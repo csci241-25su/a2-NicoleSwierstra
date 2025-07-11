@@ -481,6 +481,7 @@ public class AVLTest {
     a.avlInsert("r");
     a.avlInsert("q");
     a.avlInsert("p");
+    a.printTree();
     checkWithHeight(a);
     treeEquals(a, "f d b a c e q n m l o p x s r y z", "a b c d e f l m n o p q r s x y z", "a c b e d l m p o n r s z y x q f");
   }
