@@ -1,5 +1,14 @@
 package avl;
 
+/* Nicole Swierstra
+ * 7/12
+ * 
+ * Modifidified:
+ * changed return type of avlunique to just return the avl
+ * added a both option that would run both tests and time them against each other
+ * added getting the highest value from the avl and printing it
+ */
+
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.io.File;
@@ -22,25 +31,30 @@ public class Unique {
 				System.out.println(naiveUnique(sc));
 			} else if(args[0].equals("avl")) {
 				System.out.println("AVL:");
-				System.out.println(avlUnique(sc));
+				AVL a = avlUnique(sc);
+				int mc = a.mostCommon().num;
+				String mcstr = a.mostCommon().word;
+				System.out.println(a.size());
+				System.out.printf("Most common prefix: %s, with %d occurences.", mcstr, mc);
 			} else {
 				System.out.println("Running both avl and prefixes and timing them");
 				
 				System.out.println("AVL:");
 				
 				long ts = System.nanoTime();
-				System.out.println(avlUnique(sc));
+				System.out.println(avlUnique(sc).size());
 				long tavl = System.nanoTime() - ts;
 			
 				sc = new Scanner(f);
-				
+
 				System.out.println("Naive:");
 				
 				ts = System.nanoTime();
 				System.out.println(naiveUnique(sc));
 				long tnaive = System.nanoTime() - ts;
 
-				System.out.printf("  Results: \n\n    AVL:   %5.2fs \n\n    Naive: %5.2fs", (double)tavl / 1000000000.0, (double)tnaive / 1000000000.0);
+				System.out.printf("  Results: \n\n    AVL:   %5.2fs \n\n    Naive: %5.2fs\n\n", (double)tavl / 1000000000.0, (double)tnaive / 1000000000.0);
+
 			}
 		} catch (FileNotFoundException exc) {
 			System.out.println("Could not find file " + args[1]);
@@ -66,13 +80,13 @@ public class Unique {
 		return seen.size();
 	}
 
-	/** Return the number of unique lines availble to be read by sc */ 
-	private static int avlUnique(Scanner sc) {
+	/** Returns the avl */ 
+	private static AVL avlUnique(Scanner sc) {
 		AVL seen = new AVL();
 		int count = 0;
 		while(sc.hasNextLine()){
 			seen.avlInsert(sc.nextLine());
 		}
-		return seen.getSize();	
+		return seen;	
 	}
 }

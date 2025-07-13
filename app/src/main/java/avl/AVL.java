@@ -1,6 +1,21 @@
 package avl;
 
-public class AVL {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/*
+ * Nicole Swierstra
+ * AVL.java
+ * 
+ * Added enhancements
+ * 1. added avl remove
+ * 2. changed AVL to implement map functions - I might have taken this too literally
+ * 3. removed old opmized remove and added Map remove with correct semantics - removes one instance and then if it's 0 removes it from the tree
+ */
+public class AVL implements Map<String, Integer> {
 
 	public Node root;
 
@@ -78,6 +93,7 @@ public class AVL {
 		avlInsert(root, w);	
 	}
 
+	/* recalculates the height of a single node using the values below it in O(n) time */
 	private void recalcHeight(Node n){
 		int hright = -1, hleft = -1;
 		
@@ -111,12 +127,58 @@ public class AVL {
 					size++;
 				}
 				break;
-			default: break; /* no insertion, already exists */
+			default: n.num++; /* no insertion, just addition */
 		}
 		recalcHeight(n);
 		rebalance(n);
 	}
 
+	/* is this the most efficient system for removing a node? probably not.
+	 * does it have the least amount of pointer math? yes!
+	 * 
+	 * recursively rotates node n down the tree until it only has one child, then removes it.
+	 */
+	public void rotateToBottomAndRemove(Node n){
+		Node child;
+		switch((n.left != null ? 1 : 0) + (n.right != null ? 2 : 0)){
+		case 0:
+			if(n.parent.left == n)  n.parent.left  = null;
+			else n.parent.right = null;
+			return; /* if no children */
+		case 1: /* if left but no right */
+			child = n.left;
+			if(n.parent.left == n){
+				n.parent.left = child;
+			}
+			else {
+				rightRotate(n);
+				rotateToBottomAndRemove(n);
+			}
+			break;
+		case 2: /* if right but no left */
+			child = n.right;
+			if(n.parent.right == n){
+				n.parent.right = child;
+			}
+			else {
+				leftRotate(n);
+				rotateToBottomAndRemove(n);
+			}
+			break;
+		case 3: /* if both */
+			int b = balance(n);
+			if (b < 0){
+				rightRotate(n);
+				rotateToBottomAndRemove(n);
+			}
+			else {
+				leftRotate(n);
+				rotateToBottomAndRemove(n);
+			}	
+		}
+		recalcHeight(n.parent);
+		rebalance(n.parent);
+	}
 
 	/** do a left rotation: rotate on the edge from x to its right child.
 	 *  precondition: x has a non-null right child */
@@ -158,6 +220,7 @@ public class AVL {
 		}
 	}
 
+	/* gets the AVL balance of a node */
 	private int balance(Node n){
 		int hright = -1, hleft = -1;
 		
@@ -185,16 +248,6 @@ public class AVL {
 		if(n.parent != null) rebalance(n.parent);
 	}
 
-	/** remove the word w from the tree */
-	public void remove(String w) {
-		remove(root, w);
-	}
-
-	/* remove w from the tree rooted at n */
-	private void remove(Node n, String w) {
-		return; // (enhancement TODO - do the base assignment first)
-	}
-
 	/** print a sideways representation of the tree - root at left,
 	 * right is up, left is down. */
 	public void printTree() {
@@ -212,6 +265,130 @@ public class AVL {
 		printSubtree(n.left, level + 1);
 	}
 
+	/* returns size of the tree */
+    public int size() {
+        return getSize();
+    }
+
+	/* returns if the AVL is empty */
+    public boolean isEmpty() {
+        return root == null;
+    }
+
+	/* returns true if the key is in the tree */
+    public boolean containsKey(Object key) {
+        if(key.getClass() != String.class) return false;
+		
+		return search(root, (String)key) != null;
+    }
+
+	/* NOT IMPLEMENTED - Doesn't make any sense for this class */
+    public boolean containsValue(Object value) {
+        throw new UnsupportedOperationException("Doesn't make any sense for this type.");
+    }
+
+	/* returns the instances of the line */
+    public Integer get(Object key) {
+		if(key.getClass() != String.class) return null;
+        Node n = search((String)key);
+		if (n == null) return 0;
+		else return n.num;
+    }
+
+	/* puts a value in the tree */
+    public Integer put(String key, Integer value) {
+        if(key.getClass() != String.class) return null;
+		avlInsert(key);
+        Node n = search((String)key);
+		n.num = value;
+		return n.num;
+    }
+
+	/* 
+	 * Either decrements or removes completely a key - correct for the semantics of the AVLtree
+	 * returns 0 if it doesn't exist
+	 */
+    public Integer remove(Object key) {
+		if(key.getClass() != String.class) return null;
+        
+		Node n = search((String)key);
+		if(n == null) return null;
+
+		n.num--;
+		if(n.num == 0) {
+			rotateToBottomAndRemove(n);
+			n = n.parent;
+			while(n.parent != null){
+				rebalance(n);
+				recalcHeight(n);
+				n = n.parent;
+			}
+			return 0;
+		}
+		else{
+			return n.num;
+		}
+    }
+
+	/*
+	 * Allows you to combine AVL trees
+	 */
+    public void putAll(Map<? extends String, ? extends Integer> m) {
+        for(String s : m.keySet()){
+			put(s, m.get(s));
+		}
+    }
+
+	/* clears the avl tree */
+    public void clear() {
+        root = null;
+    }
+
+	/* Gets set of all keys */
+	private void inOrder(Node n, Set<String> set){
+		if (n == null) return;
+		inOrder(n.left, set);
+		set.add(n.word);
+		inOrder(n.right, set);
+	}
+
+	/* returns set of all keys */
+    public Set<String> keySet() {
+        Set<String> s = new HashSet<String>();
+		inOrder(root, s);
+		return s;
+    }
+
+	/* this doens't make any sense for this type */
+    public Collection<Integer> values() {
+        throw new UnsupportedOperationException("This doesn't make any sense for the type.");
+    }
+
+	/* what is this??? */
+    public Set<Entry<String, Integer>> entrySet() {
+        throw new UnsupportedOperationException("I have no idea what this is.");
+    }
+
+	/* recursively finds the most common node */
+	private Node mostCommon(Node n){
+		Node mc = n;
+		if(n.left != null){
+			Node l = mostCommon(n.left);
+			if (l.num > mc.num) mc = l;
+		}
+		if(n.right != null){
+			Node r = mostCommon(n.right);
+			if (r.num > mc.num) mc = r;
+		}
+		return mc;
+	}
+
+	/* returns most common node in the AVL tree */
+	public Node mostCommon(){
+		if(root == null) return null;
+		return mostCommon(root);
+	}
+
 	/** inner class representing a node in the tree. */
 	public class Node {
 		public String word;
@@ -219,6 +396,7 @@ public class AVL {
 		public Node left;
 		public Node right;
 		public int height;
+		public int num; /* this is the MAP part */
 
 		public String toString() {
 			return word + "(" + height + ")";

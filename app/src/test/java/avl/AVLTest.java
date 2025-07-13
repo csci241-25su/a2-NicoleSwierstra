@@ -481,7 +481,6 @@ public class AVLTest {
     a.avlInsert("r");
     a.avlInsert("q");
     a.avlInsert("p");
-    a.printTree();
     checkWithHeight(a);
     treeEquals(a, "f d b a c e q n m l o p x s r y z", "a b c d e f l m n o p q r s x y z", "a c b e d l m p o n r s z y x q f");
   }
@@ -597,5 +596,27 @@ public class AVLTest {
   }
 
 
-
+  @Test
+  /** Test avlInsert with rotations needed */
+  public void test70avlRemove() {
+    AVL a = new AVL();
+    a.avlInsert("a");
+    a.avlInsert("b");
+    a.avlInsert("c");
+    a.avlInsert("o");
+    a.avlInsert("s");
+    a.avlInsert("r");
+    a.avlInsert("q");
+    a.avlInsert("p");
+    a.avlInsert("f");
+    a.printTree();
+    
+    System.out.println("\n\n\n\n\n\n");
+    a.avlRemove("b");
+    a.printTree();
+    
+    System.out.println("\n\n\n\n\n\n");
+    a.avlRemove("c");
+    a.printTree();
+  }
 }
