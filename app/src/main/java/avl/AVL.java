@@ -289,7 +289,7 @@ public class AVL implements Map<String, Integer> {
 
 	/* returns the instances of the line */
     public Integer get(Object key) {
-		if(key.getClass() != String.class) return null;
+		if(key.getClass() != String.class) return 0;
         Node n = search((String)key);
 		if (n == null) return 0;
 		else return n.num;
@@ -407,17 +407,20 @@ public class AVL implements Map<String, Integer> {
 
 		/** constructor: sets only word */
 		public Node(String w) {
+			num = 1;
 			word = w;
 		}
 
 		/** constructor: sets word and parent fields */
 		public Node(String w, Node p) {
+			num = 1;
 			word = w;
 			parent = p;
 		}
 
 		/** constructor: sets all fields */
 		public Node(String w, Node p, Node l, Node r) {
+			num = 1;
 			word = w;
 			parent = p;
 			left = l;

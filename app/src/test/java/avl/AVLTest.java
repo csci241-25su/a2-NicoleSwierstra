@@ -595,9 +595,8 @@ public class AVLTest {
 
   }
 
-
+  /* tests avl remove */
   @Test
-  /** Test avlInsert with rotations needed */
   public void test70avlRemove() {
     AVL a = new AVL();
     a.avlInsert("a");
@@ -611,12 +610,40 @@ public class AVLTest {
     a.avlInsert("f");
     a.printTree();
     
-    System.out.println("\n\n\n\n\n\n");
-    a.avlRemove("b");
-    a.printTree();
+    a.remove("b");
+
+    assertEquals((long)0, (long)a.get("b"));
     
     System.out.println("\n\n\n\n\n\n");
-    a.avlRemove("c");
-    a.printTree();
+    a.remove("c");
+
+    assertEquals((long)0, (long)a.get("c"));
+  }
+
+  /* tests the new removal semantics */
+  @Test
+  public void test71Remove(){
+    AVL a = new AVL();
+    a.avlInsert("a");
+    a.avlInsert("b");
+    a.avlInsert("c");
+
+    a.avlInsert("a");
+    a.avlInsert("b");
+
+
+    System.out.println(a.get("a"));
+    System.out.println(a.get("b"));
+
+    assertEquals((long)2, (long)a.get("b"));
+    assertEquals((long)2, (long)a.get("a"));
+
+    a.remove("a");
+
+    assertEquals((long)2, (long)a.get("b"));
+    
+    a.remove("a");
+
+    assertEquals((long)0, (long)a.get("a"));
   }
 }
